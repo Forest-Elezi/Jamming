@@ -1,15 +1,15 @@
 import React from "react";
 import Track from "../Track/Track.jsx";
 
-const SearchResults = ({ results, addTrack }) => {
+const SearchResults = ({ searchResults, handleAddTrack }) => {
   return (
     <>
-      {results.map((result) => (
+      {searchResults.map((result) => (
         <Track
           key={result.id}
           track={result}
-          addTrack={addTrack}
-          isRemoval={false}
+          handleAddTrack={handleAddTrack}
+          isInPlaylist={false}
         />
       ))}
     </>

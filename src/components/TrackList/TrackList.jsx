@@ -1,11 +1,16 @@
 import React from "react";
 import Track from "../Track/Track";
 
-const TrackList = ({ tracklists }) => {
+const TrackList = ({ playlistTracks, isInPlaylist, handleRemoveTrack }) => {
   return (
     <>
-      {tracklists.map((track) => (
-        <Track key={track.id} track={track} />
+      {playlistTracks.map((track) => (
+        <Track
+          key={track.id}
+          track={track}
+          isInPlaylist={isInPlaylist}
+          handleRemoveTrack={handleRemoveTrack}
+        />
       ))}
     </>
   );

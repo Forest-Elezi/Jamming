@@ -1,6 +1,6 @@
 import React from "react";
 
-const Track = ({ track, addTrack, isRemoval }) => {
+const Track = ({ track, handleAddTrack, isInPlaylist, handleRemoveTrack }) => {
   return (
     <>
       <div>
@@ -9,7 +9,12 @@ const Track = ({ track, addTrack, isRemoval }) => {
           {track.artist} | {track.album}
         </p>
       </div>
-      {!isRemoval && <button onClick={() => addTrack(track)}>+</button>}
+      {!isInPlaylist && (
+        <button onClick={() => handleAddTrack(track)}>+</button>
+      )}
+      {isInPlaylist && (
+        <button onClick={() => handleRemoveTrack(track)}>-</button>
+      )}
     </>
   );
 };
