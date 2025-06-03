@@ -2,7 +2,7 @@
 const generateRandomString = (length) => {
   const possible =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const values = crypto.getRandomValues(new Uint8Array(length));
+  const values = window.crypto.getRandomValues(new Uint8Array(length));
   return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 };
 
@@ -60,71 +60,177 @@ let code = urlParams.get("code");
 
 // Request an Access Token -->
 
-const getToken = async (code) => {
-  // stored in the previous step
-  const codeVerifier = localStorage.getItem("code_verifier");
+const Spotify = {
+  async getToken(code) {
+    // stored in the previous step
+    const codeVerifier = localStorage.getItem("code_verifier");
 
-  const url = "https://accounts.spotify.com/api/token";
-  const payload = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: clientId,
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: redirectUri,
-      code_verifier: codeVerifier,
-    }),
-  };
+    const url = "https://accounts.spotify.com/api/token";
+    const payload = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: clientId,
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: redirectUri,
+        code_verifier: codeVerifier,
+      }),
+    };
 
-  const body = await fetch(url, payload);
-  const response = await body.json();
+    const body = await fetch(url, payload);
+    const response = await body.json();
 
-  localStorage.setItem("access_token", response.access_token);
+    localStorage.setItem("access_token", response.access_token);
+  },
+
+  // Refreshing Token -->
+
+  async getRefreshToken() {
+    // refresh token that has been previously stored
+    const refreshToken = localStorage.getItem("refresh_token");
+    const url = "https://accounts.spotify.com/api/token";
+
+    const payload = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: clientId,
+      }),
+    };
+    const body = await fetch(url, payload);
+    const response = await body.json();
+
+    localStorage.setItem("access_token", response.access_token);
+    if (response.refresh_token) {
+      localStorage.setItem("refresh_token", response.refresh_token);
+    }
+  },
+
+  // Search Request -->
+
+  async searchTracks(query) {
+    const accessToken = localStorage.getItem("access_token");
+    const url = new URL("https://api.spotify.com/v1/search");
+    url.search = new URLSearchParams({
+      q: query,
+      type: "track",
+      limit: 10,
+    });
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+
+    return data.tracks.items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      artist: item.artists[0].name,
+      album: item.album.name,
+      uri: item.uri,
+    }));
+  },
+
+  // Get UserID Fetch Request -->
+
+  async getUserID() {
+    const accessToken = localStorage.getItem("access_token");
+    const url = "https://api.spotify.com/v1/me";
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+
+    return data.id;
+  },
+
+  // Create a Playlist request -->
+
+  async createPlaylist(playlistName) {
+    const accessToken = localStorage.getItem("access_token");
+    const userID = await this.getUserID();
+    const url = `https://api.spotify.com/v1/users/${userID}/playlists`;
+
+    const payload = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: playlistName,
+        public: false,
+      }),
+    };
+
+    const response = await fetch(url, payload);
+    const data = await response.json();
+
+    return data;
+  },
+
+  async addToPlaylist(playlistName, query) {
+    const accessToken = localStorage.getItem("access_token");
+    const userID = await this.getUserID();
+    const { id: playlistID } = await this.createPlaylist(playlistName);
+    const tracks = await this.searchTracks(query);
+    if (!tracks.length) {
+      throw new Error("No tracks found for the query.");
+    }
+    const tracksUri = tracks.map((track) => track.uri);
+    const url = `https://api.spotify.com/v1/users/${userID}/playlists/${playlistID}/tracks`;
+
+    const payload = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uris: tracksUri,
+        position: 0,
+      }),
+    };
+
+    const response = await fetch(url, payload);
+    const data = await response.json();
+
+    return data;
+  },
 };
 
-// Refreshing Token -->
+if (code) {
+  Spotify.getToken(code);
+}
 
-const getRefreshToken = async () => {
-  // refresh token that has been previously stored
-  const refreshToken = localStorage.getItem("refresh_token");
-  const url = "https://accounts.spotify.com/api/token";
-
-  const payload = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: clientId,
-    }),
-  };
-  const body = await fetch(url, payload);
-  const response = await body.json();
-
-  localStorage.setItem("access_token", response.access_token);
-  if (response.refresh_token) {
-    localStorage.setItem("refresh_token", response.refresh_token);
-  }
-};
-
-// Extract Accecc Token and Expiration time from URL
+// Extract Access Token and Expiration time from URL -->
 
 const hashParams = new URLSearchParams(window.location.hash.substring(1));
 const accessToken = hashParams.get("access_token");
 const expiresIn = hashParams.get("expires_in");
 
-// Store token, expire it, alert user, clean URL
+// Store token, expire time, alert user, clean URL
 
 if (accessToken) {
   localStorage.setItem("access_token", accessToken);
   setTimeout(() => localStorage.removeItem("access_token"), expiresIn * 1000);
+  window.history.replaceState({}, document.title, "/");
 } else {
   alert("Please log in to Spotify to continue.");
 }
 
-window.history.replaceState({}, document.title, "/");
+export default Spotify;

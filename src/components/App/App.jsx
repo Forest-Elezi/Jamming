@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./App.css";
 import SearchResults from "../SearchResults/SearchResults.jsx";
 import Playlist from "../Playlist/Playlist.jsx";
+import Spotify from "../../utils/Spotify.js";
 
 function App() {
   const [playlistName, setPlaylistName] = useState("My Playlist");
@@ -28,20 +29,6 @@ function App() {
       album: "When We All Fall Asleep, Where Do We Go?",
       uri: "spotify:track: 3",
     },
-    {
-      id: 4,
-      name: "Hotline Bling",
-      artist: "Drake",
-      album: "Views",
-      uri: "spotify:track: 4",
-    },
-    {
-      id: 5,
-      name: "Vampire",
-      artist: "Olivia Rodrigo",
-      album: "Guts",
-      uri: "spotify:track: 5",
-    },
   ]);
 
   const handleAddTrack = (track) => {
@@ -55,6 +42,11 @@ function App() {
     setPlaylistTracks((prev) => prev.filter((t) => t.id !== track.id));
   };
 
+  const handlePlaylistName = async () => {
+    const data = await Spotify.createPlaylist(playlistName);
+    setPlaylistName(data);
+  };
+
   return (
     <>
       <div>
@@ -66,7 +58,7 @@ function App() {
       </div>
       <Playlist
         playlistName={playlistName}
-        setPlaylistName={setPlaylistName}
+        onCreatePlaylist={handlePlaylistName}
         playlistTracks={playlistTracks}
         setPlaylistTracks={setPlaylistTracks}
         handleRemoveTrack={handleRemoveTrack}
