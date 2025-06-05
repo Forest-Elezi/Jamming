@@ -1,9 +1,10 @@
 import React from "react";
 import Track from "../Track/Track";
+import styles from "./TrackList.module.css";
 
 const TrackList = ({ playlistTracks, isInPlaylist, handleRemoveTrack }) => {
   return (
-    <>
+    <div className={styles["track-list"]} >
       {playlistTracks.map((track) => (
         <Track
           key={track.id}
@@ -12,7 +13,7 @@ const TrackList = ({ playlistTracks, isInPlaylist, handleRemoveTrack }) => {
           handleRemoveTrack={handleRemoveTrack}
         />
       ))}
-    </>
+    </div>
   );
 };
 

@@ -1,0 +1,32 @@
+.searchBarContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .searchInput {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    width: 280px;
+    box-sizing: border-box;
+  }
+  
+  .searchButton {
+    background-color: #1DB954;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .searchButton:hover {
+    background-color: #1aa34a;
+  }

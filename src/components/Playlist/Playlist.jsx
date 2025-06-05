@@ -1,51 +1,39 @@
 import React from "react";
 import TrackList from "../TrackList/TrackList.jsx";
+import styles from "./Playlist.module.css";
 
 const Playlist = ({
   playlistName,
   setPlaylistName,
   playlistTracks,
-  setPlaylistTracks,
   handleRemoveTrack,
+  handleSaveToSpotify,
 }) => {
   const handlePlaylist = ({ target }) => {
     setPlaylistName(target.value);
   };
 
-  const handleSavePlaylist = (tracks) => {
-    const URIarray = tracks.map((track) => track.uri);
-    console.log(URIarray);
-    setPlaylistTracks([]);
-  };
-
   return (
-    <>
-      <div>
-        <label htmlFor="name">
-          <input
-            id="name"
-            type="text"
-            value={playlistName}
-            onChange={handlePlaylist}
-          />
-        </label>
-      </div>
-      <div>
-        <TrackList
-          playlistTracks={playlistTracks}
-          isInPlaylist={true}
-          handleRemoveTrack={handleRemoveTrack}
+    <div className={styles.container} >
+      <label htmlFor="name">
+        <input
+          className={styles.name}
+          id="name"
+          type="text"
+          value={playlistName}
+          onChange={handlePlaylist}
         />
-      </div>
-      <button onClick={() => handleSavePlaylist(playlistTracks)}>
+      </label>
+      <TrackList
+        playlistTracks={playlistTracks}
+        isInPlaylist={true}
+        handleRemoveTrack={handleRemoveTrack}
+      />
+      <button onClick={handleSaveToSpotify} className={styles.button}>
         SAVE TO SPOTIFY
       </button>
-    </>
+    </div>
   );
 };
-
-/* To obtain a Spotify uri, 
-simply right-click (on Windows) or 
-ctrl-click (on Mac) on a song’s name. */
 
 export default Playlist;

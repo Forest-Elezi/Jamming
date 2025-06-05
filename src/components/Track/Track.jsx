@@ -1,9 +1,10 @@
 import React from "react";
+import styles from "./Track.module.css";
 
 const Track = ({ track, handleAddTrack, isInPlaylist, handleRemoveTrack }) => {
   return (
-    <>
-      <div>
+    <div className={styles.trackRow} >
+      <div className={styles.track} >
         <h3>{track.name}</h3>
         <p>
           {track.artist} | {track.album}
@@ -15,7 +16,7 @@ const Track = ({ track, handleAddTrack, isInPlaylist, handleRemoveTrack }) => {
       {isInPlaylist && (
         <button onClick={() => handleRemoveTrack(track)}>-</button>
       )}
-    </>
+    </div>
   );
 };
 
