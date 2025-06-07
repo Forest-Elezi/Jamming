@@ -145,13 +145,27 @@ const Spotify = {
       return [];
     }
 
-    return data.tracks.items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      artist: item.artists[0].name,
-      album: item.album.name,
-      uri: item.uri,
-    }));
+    const uniqueTracks = new Map();
+    data.tracks.items.forEach((item) => {
+      if (!uniqueTracks.has(item.id)) {
+        uniqueTracks.set(item.id, {
+          id: item.id,
+          name: item.name,
+          artist: item.artists[0].name,
+          album: item.album.name,
+          uri: item.uri,
+        })
+      }
+    })
+    
+    return Array.from(uniqueTracks.values());
+    // return data.tracks.items.map((item) => ({
+    //   id: item.id,
+    //   name: item.name,
+    //   artist: item.artists[0].name,
+    //   album: item.album.name,
+    //   uri: item.uri,
+    // }));
   },
 
   // Get UserID Fetch Request -->
@@ -196,14 +210,16 @@ const Spotify = {
     return data;
   },
 
-  async addToPlaylist(playlistName, query) {
+  async addToPlaylist(playlistName, tracks) {
     const accessToken = localStorage.getItem("access_token");
     const userID = await this.getUserID();
     const { id: playlistID } = await this.createPlaylist(playlistName);
-    const tracks = await this.searchTracks(query);
+    // const tracks = await this.searchTracks(query);
+
     if (!tracks.length) {
-      throw new Error("No tracks found for the query.");
+      throw new Error("No tracks to add");
     }
+
     const tracksUri = tracks.map((track) => track.uri);
     const url = `https://api.spotify.com/v1/users/${userID}/playlists/${playlistID}/tracks`;
 

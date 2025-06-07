@@ -6,8 +6,14 @@ const SearchBar = ({ searchTerm, setSearchTerm, handleSearch }) => {
     setSearchTerm(target.value);
   };
 
+  const handleOnKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
-    <div className={styles.searchBarContainer} >
+    <div className={styles.searchBarContainer}>
       <div>
         <label htmlFor="search">
           <input
@@ -17,6 +23,7 @@ const SearchBar = ({ searchTerm, setSearchTerm, handleSearch }) => {
             placeholder="Enter A Song Title"
             value={searchTerm}
             onChange={handleSearchTerm}
+            onKeyDown={handleOnKeyDown}
           />
         </label>
       </div>

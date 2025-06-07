@@ -14,7 +14,7 @@ const Playlist = ({
   };
 
   return (
-    <div className={styles.container} >
+    <div className={styles.container}>
       <label htmlFor="name">
         <input
           className={styles.name}
@@ -29,7 +29,11 @@ const Playlist = ({
         isInPlaylist={true}
         handleRemoveTrack={handleRemoveTrack}
       />
-      <button onClick={handleSaveToSpotify} className={styles.button}>
+      <button
+        onClick={handleSaveToSpotify}
+        className={styles.button}
+        disabled={playlistTracks.length === 0}
+      >
         SAVE TO SPOTIFY
       </button>
     </div>

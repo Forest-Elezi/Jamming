@@ -24,12 +24,21 @@ function App() {
 
   const handleSearch = async () => {
     const data = await Spotify.searchTracks(searchTerm);
-    setSearchResults(data);
+
+    const uniqueTracks = data.reduce((acc, track) => {
+      if (!acc.find((t) => t.id === track.id)) acc.push(track);
+      return acc;
+    }, []);
+    setSearchResults(uniqueTracks);
+    setSearchTerm("");
   };
 
   const handleSaveToSpotify = async () => {
-    await Spotify.addToPlaylist(playlistName, searchTerm);
-    setPlaylistTracks([]);
+    if (playlistTracks.length !== 0) {
+      await Spotify.addToPlaylist(playlistName, playlistTracks);
+      setPlaylistTracks([]);
+      setPlaylistName("My Playlist");
+    }
   };
 
   const handleAddTrack = (track) => {
@@ -44,21 +53,23 @@ function App() {
   };
 
   return (
-    <div className={styles.app} >
-      <h1>Jamming</h1>
+    <div className={styles.app}>
+      <h1>
+        <span className={styles.highlight}>Jamming</span>
+      </h1>
       <SearchBar
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         handleSearch={handleSearch}
       />
-      <div className={styles.wrapper} >
+      <div className={styles.wrapper}>
         <div className={styles.card}>
           <SearchResults
             searchResults={searchResults}
             handleAddTrack={handleAddTrack}
           />
         </div>
-        <div className={styles.card} >
+        <div className={styles.card}>
           <Playlist
             playlistName={playlistName}
             setPlaylistName={setPlaylistName}
